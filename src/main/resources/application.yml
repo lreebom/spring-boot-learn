@@ -2,11 +2,8 @@ spring:
   application:
     name: spring-boot-learn
 
-  datasource:
-    url: jdbc:mysql://localhost:3306/spring_boot_learn?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
-    username: root
-    password: 851809
-    driver-class-name: com.mysql.cj.jdbc.Driver
+  profiles:
+    active: dev
 
 mybatis:
   mapper-locations: classpath:mapper/*.xml
