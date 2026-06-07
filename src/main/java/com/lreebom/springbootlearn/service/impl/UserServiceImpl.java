@@ -8,6 +8,7 @@ import com.lreebom.springbootlearn.model.dto.UserDeleteDTO;
 import com.lreebom.springbootlearn.model.dto.UserPageQueryDTO;
 import com.lreebom.springbootlearn.model.dto.UserUpdateDTO;
 import com.lreebom.springbootlearn.model.entity.User;
+import com.lreebom.springbootlearn.model.enums.UserStatusEnum;
 import com.lreebom.springbootlearn.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -70,29 +71,48 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void update(UserUpdateDTO updateDTO) {
+        if (updateDTO.getId() == null) {
+            throw new BusinessException("用户ID不能为空");
+        }
+
+        if (updateDTO.getUsername() == null && updateDTO.getEmail() == null && updateDTO.getStatus() == null) {
+            throw new BusinessException("至少更新一个字段");
+        }
+
         User user = userMapper.selectById(updateDTO.getId());
         if (user == null) {
             throw new BusinessException("用户不存在");
         }
 
-        User existUsername = userMapper.selectByUsername(updateDTO.getUsername());
-        if (existUsername != null && !existUsername.getId().equals(updateDTO.getId())) {
-            throw new BusinessException("用户名已存在");
+        if (updateDTO.getUsername() != null) {
+            User existUsername = userMapper.selectByUsername(updateDTO.getUsername());
+            if (existUsername != null && !existUsername.getId().equals(updateDTO.getId())) {
+                throw new BusinessException("用户名已存在");
+            }
         }
 
-        User existEmail = userMapper.selectByEmail(updateDTO.getEmail());
-        if (existEmail != null && !existEmail.getId().equals(updateDTO.getId())) {
-            throw new BusinessException("邮箱已存在");
+        if (updateDTO.getEmail() != null) {
+            User existEmail = userMapper.selectByEmail(updateDTO.getEmail());
+            if (existEmail != null && !existEmail.getId().equals(updateDTO.getId())) {
+                throw new BusinessException("邮箱已存在");
+            }
         }
 
-        user.setUsername(updateDTO.getUsername());
-        user.setEmail(updateDTO.getEmail());
+        if (updateDTO.getStatus() != null && !UserStatusEnum.contains(updateDTO.getStatus())) {
+            throw new BusinessException("用户状态不合法");
+        }
 
-        int rows = userMapper.update(user);
+        User updateUser = new User();
+        updateUser.setId(updateDTO.getId());
+        updateUser.setUsername(updateDTO.getUsername());
+        updateUser.setEmail(updateDTO.getEmail());
+        updateUser.setStatus(updateDTO.getStatus());
+
+        int rows = userMapper.update(updateUser);
         if (rows != 1) {
             throw new BusinessException("更新用户失败");
         }
-        log.info("更新用户成功，userId={} username={}", user.getId(), user.getUsername());
+        log.info("更新用户成功，userId={}", updateUser.getId());
     }
 
     @Override

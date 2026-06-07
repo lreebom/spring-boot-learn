@@ -2,21 +2,21 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.lreebom.springbootlearn.mapper.UserMapper">
     <select id="selectById" resultType="com.lreebom.springbootlearn.model.entity.User">
-        select id, username, email, deleted, create_time, update_time
+        select id, username, email, status, deleted, create_time, update_time
         from user
         where id = #{id}
           and deleted = 0
     </select>
 
     <select id="selectByUsername" resultType="com.lreebom.springbootlearn.model.entity.User">
-        select id, username, email, deleted, create_time, update_time
+        select id, username, email, status, deleted, create_time, update_time
         from user
         where username = #{username}
           and deleted = 0
     </select>
 
     <select id="selectByEmail" resultType="com.lreebom.springbootlearn.model.entity.User">
-        select id, username, email, deleted, create_time, update_time
+        select id, username, email, status, deleted, create_time, update_time
         from user
         where email = #{email}
           and deleted = 0
@@ -28,7 +28,7 @@
     </insert>
 
     <select id="selectPage" resultType="com.lreebom.springbootlearn.model.entity.User">
-        select id, username, email, deleted, create_time, update_time
+        select id, username, email, status, deleted, create_time, update_time
         from user
         where deleted = 0
         order by create_time desc
@@ -43,10 +43,19 @@
 
     <update id="update" parameterType="com.lreebom.springbootlearn.model.entity.User">
         update user
-        set username = #{username},
-            email    = #{email}
+        <set>
+            <if test="username != null">
+                username = #{username},
+            </if>
+            <if test="email != null">
+                email = #{email},
+            </if>
+            <if test="status != null">
+                status = #{status},
+            </if>
+        </set>
         where id = #{id}
-          and deleted = 0
+        and deleted = 0
     </update>
 
     <delete id="deleteById">
