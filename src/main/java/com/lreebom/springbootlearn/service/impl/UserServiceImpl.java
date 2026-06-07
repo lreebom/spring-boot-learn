@@ -9,10 +9,12 @@ import com.lreebom.springbootlearn.model.dto.UserPageQueryDTO;
 import com.lreebom.springbootlearn.model.dto.UserUpdateDTO;
 import com.lreebom.springbootlearn.model.entity.User;
 import com.lreebom.springbootlearn.service.UserService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Slf4j
 @Service
 public class UserServiceImpl implements UserService {
 
@@ -52,6 +54,7 @@ public class UserServiceImpl implements UserService {
         if (rows != 1) {
             throw new BusinessException("创建用户失败");
         }
+        log.info("创建用户成功，userId={} username={}", user.getId(), user.getUsername());
         return user.getId();
     }
 
@@ -89,6 +92,7 @@ public class UserServiceImpl implements UserService {
         if (rows != 1) {
             throw new BusinessException("更新用户失败");
         }
+        log.info("更新用户成功，userId={} username={}", user.getId(), user.getUsername());
     }
 
     @Override
@@ -102,5 +106,6 @@ public class UserServiceImpl implements UserService {
         if (rows != 1) {
             throw new BusinessException("删除用户失败");
         }
+        log.info("删除用户成功，userId={} username={}", user.getId(), user.getUsername());
     }
 }
