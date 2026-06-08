@@ -1,5 +1,6 @@
 package com.lreebom.springbootlearn.mapper;
 
+import com.lreebom.springbootlearn.model.dto.UserPageQueryDTO;
 import com.lreebom.springbootlearn.model.entity.User;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -17,9 +18,9 @@ public interface UserMapper {
 
     User selectByEmail(@Param("email") String email);
 
-    List<User> selectPage(@Param("offset") int offset, @Param("limit") int limit);
+    List<User> selectPage(@Param("query") UserPageQueryDTO queryDTO, @Param("offset") int offset, @Param("limit") int limit);
 
-    Long count();
+    Long count(@Param("query") UserPageQueryDTO queryDTO);
 
     int update(User user);
 

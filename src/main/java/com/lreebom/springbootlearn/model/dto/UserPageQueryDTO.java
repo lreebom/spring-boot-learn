@@ -16,4 +16,8 @@ public class UserPageQueryDTO {
     @Min(value = 1, message = "每页条数必须大于0")
     @Max(value = 1000, message = "每页条数不能超过1000")
     private Integer pageSize = 10;
+
+    private String username;
+    private String email;
+    private Integer status;
 }

@@ -31,6 +31,15 @@
         select id, username, email, status, deleted, create_time, update_time
         from user
         where deleted = 0
+        <if test="query.username != null and query.username != ''">
+            and username like concat('%', #{query.username}, '%')
+        </if>
+        <if test="query.email != null and query.email != ''">
+            and email like concat('%', #{query.email}, '%')
+        </if>
+        <if test="query.status != null">
+            and status = #{query.status}
+        </if>
         order by create_time desc
         limit #{offset}, #{limit}
     </select>
@@ -39,6 +48,15 @@
         select count(*)
         from user
         where deleted = 0
+        <if test="query.username != null and query.username != ''">
+            and username like concat('%', #{query.username}, '%')
+        </if>
+        <if test="query.email != null and query.email != ''">
+            and email like concat('%', #{query.email}, '%')
+        </if>
+        <if test="query.status != null">
+            and status = #{query.status}
+        </if>
     </select>
 
     <update id="update" parameterType="com.lreebom.springbootlearn.model.entity.User">

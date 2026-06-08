@@ -61,10 +61,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public PageResult<User> page(UserPageQueryDTO queryDTO) {
+        if (queryDTO.getStatus() != null && !UserStatusEnum.contains(queryDTO.getStatus())) {
+            throw new BusinessException("用户状态不合法");
+        }
+
         int offset = (queryDTO.getPageNum() - 1) * queryDTO.getPageSize();
 
-        List<User> records = userMapper.selectPage(offset, queryDTO.getPageSize());
-        long total = userMapper.count();
+        List<User> records = userMapper.selectPage(queryDTO, offset, queryDTO.getPageSize());
+        long total = userMapper.count(queryDTO);
 
         return new PageResult<>(total, records);
     }
