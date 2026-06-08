@@ -11,6 +11,7 @@ import com.lreebom.springbootlearn.model.entity.User;
 import com.lreebom.springbootlearn.model.enums.UserStatusEnum;
 import com.lreebom.springbootlearn.service.UserService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -48,8 +49,8 @@ public class UserServiceImpl implements UserService {
         }
 
         User user = new User();
-        user.setUsername(createDTO.getUsername());
-        user.setEmail(createDTO.getEmail());
+
+        BeanUtils.copyProperties(createDTO, user);
 
         int rows = userMapper.insert(user);
         if (rows != 1) {
@@ -107,10 +108,7 @@ public class UserServiceImpl implements UserService {
         }
 
         User updateUser = new User();
-        updateUser.setId(updateDTO.getId());
-        updateUser.setUsername(updateDTO.getUsername());
-        updateUser.setEmail(updateDTO.getEmail());
-        updateUser.setStatus(updateDTO.getStatus());
+        BeanUtils.copyProperties(updateDTO, updateUser);
 
         int rows = userMapper.update(updateUser);
         if (rows != 1) {
