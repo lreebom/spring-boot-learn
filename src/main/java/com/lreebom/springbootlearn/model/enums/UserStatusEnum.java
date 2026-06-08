@@ -7,11 +7,11 @@ public enum UserStatusEnum {
     DISABLED(0, "禁用"), ENABLED(1, "启用");
 
     private final Integer code;
-    private final String description;
+    private final String name;
 
-    UserStatusEnum(Integer code, String description) {
+    UserStatusEnum(Integer code, String name) {
         this.code = code;
-        this.description = description;
+        this.name = name;
     }
 
     public static boolean contains(Integer code) {
@@ -24,6 +24,15 @@ public enum UserStatusEnum {
             }
         }
         return false;
+    }
+
+    public static String getNameByCode(Integer code) {
+        for (UserStatusEnum status : UserStatusEnum.values()) {
+            if (status.getCode().equals(code)) {
+                return status.getName();
+            }
+        }
+        return null;
     }
 
 }

@@ -9,6 +9,7 @@ import com.lreebom.springbootlearn.model.dto.UserPageQueryDTO;
 import com.lreebom.springbootlearn.model.dto.UserUpdateDTO;
 import com.lreebom.springbootlearn.model.entity.User;
 import com.lreebom.springbootlearn.model.enums.UserStatusEnum;
+import com.lreebom.springbootlearn.model.vo.UserVO;
 import com.lreebom.springbootlearn.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -26,13 +27,20 @@ public class UserServiceImpl implements UserService {
         this.userMapper = userMapper;
     }
 
+    private UserVO convertToVO(User user) {
+        UserVO userVO = new UserVO();
+        BeanUtils.copyProperties(user, userVO);
+        userVO.setStatusName(UserStatusEnum.getNameByCode(user.getStatus()));
+        return userVO;
+    }
+
     @Override
-    public User getById(Long id) {
+    public UserVO getById(Long id) {
         User user = userMapper.selectById(id);
         if (user == null) {
             throw new BusinessException("用户不存在");
         }
-        return user;
+        return convertToVO(user);
     }
 
     @Override
@@ -61,7 +69,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public PageResult<User> page(UserPageQueryDTO queryDTO) {
+    public PageResult<UserVO> page(UserPageQueryDTO queryDTO) {
         if (queryDTO.getStatus() != null && !UserStatusEnum.contains(queryDTO.getStatus())) {
             throw new BusinessException("用户状态不合法");
         }
@@ -71,7 +79,8 @@ public class UserServiceImpl implements UserService {
         List<User> records = userMapper.selectPage(queryDTO, offset, queryDTO.getPageSize());
         long total = userMapper.count(queryDTO);
 
-        return new PageResult<>(total, records);
+        List<UserVO> userVOs = records.stream().map(this::convertToVO).toList();
+        return new PageResult<>(total, userVOs);
     }
 
     @Override

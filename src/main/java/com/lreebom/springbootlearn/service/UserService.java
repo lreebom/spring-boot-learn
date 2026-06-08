@@ -5,14 +5,14 @@ import com.lreebom.springbootlearn.model.dto.UserCreateDTO;
 import com.lreebom.springbootlearn.model.dto.UserDeleteDTO;
 import com.lreebom.springbootlearn.model.dto.UserPageQueryDTO;
 import com.lreebom.springbootlearn.model.dto.UserUpdateDTO;
-import com.lreebom.springbootlearn.model.entity.User;
+import com.lreebom.springbootlearn.model.vo.UserVO;
 
 public interface UserService {
-    User getById(Long id);
+    UserVO getById(Long id);
 
     Long create(UserCreateDTO createDTO);
 
-    PageResult<User> page(UserPageQueryDTO pageQueryDTO);
+    PageResult<UserVO> page(UserPageQueryDTO pageQueryDTO);
 
     void update(UserUpdateDTO updateDTO);
 

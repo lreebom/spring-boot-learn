@@ -6,7 +6,7 @@ import com.lreebom.springbootlearn.model.dto.UserCreateDTO;
 import com.lreebom.springbootlearn.model.dto.UserDeleteDTO;
 import com.lreebom.springbootlearn.model.dto.UserPageQueryDTO;
 import com.lreebom.springbootlearn.model.dto.UserUpdateDTO;
-import com.lreebom.springbootlearn.model.entity.User;
+import com.lreebom.springbootlearn.model.vo.UserVO;
 import com.lreebom.springbootlearn.service.UserService;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -25,7 +25,7 @@ public class UserController {
     }
 
     @GetMapping("/getById")
-    public R<User> getById(@RequestParam @NotNull(message = "用户ID不能为空") @Min(value = 1, message = "用户ID必须大于0") Long id) {
+    public R<UserVO> getById(@RequestParam @NotNull(message = "用户ID不能为空") @Min(value = 1, message = "用户ID必须大于0") Long id) {
         return R.ok(userService.getById(id));
     }
 
@@ -35,7 +35,7 @@ public class UserController {
     }
 
     @GetMapping("/list")
-    public R<PageResult<User>> list(@Validated UserPageQueryDTO queryDTO) {
+    public R<PageResult<UserVO>> list(@Validated UserPageQueryDTO queryDTO) {
         return R.ok(userService.page(queryDTO));
     }
 

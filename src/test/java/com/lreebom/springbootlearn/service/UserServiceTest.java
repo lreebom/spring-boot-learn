@@ -2,7 +2,7 @@ package com.lreebom.springbootlearn.service;
 
 import com.lreebom.springbootlearn.common.BusinessException;
 import com.lreebom.springbootlearn.model.dto.UserCreateDTO;
-import com.lreebom.springbootlearn.model.entity.User;
+import com.lreebom.springbootlearn.model.vo.UserVO;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +27,7 @@ public class UserServiceTest {
 
         Assertions.assertThat(id).isNotNull();
 
-        User user = userService.getById(id);
+        UserVO user = userService.getById(id);
         Assertions.assertThat(user.getUsername()).isEqualTo(createDTO.getUsername());
         Assertions.assertThat(user.getEmail()).isEqualTo(createDTO.getEmail());
     }
