@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lreebom.springbootlearn.mapper.DeptMapper">
+    <select id="selectById" resultType="com.lreebom.springbootlearn.model.entity.Dept">
+        select id, dept_name, create_time, update_time
+        from dept
+        where id = #{id}
+          and deleted = 0
+    </select>
+
+</mapper>
