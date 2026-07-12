@@ -15,6 +15,13 @@
         and deleted = 0
     </select>
 
+    <select id="selectList" resultType="com.lreebom.springbootlearn.model.vo.DeptVO">
+        select id, dept_name, create_time, update_time
+        from dept
+        where deleted = 0
+        order by create_time desc
+    </select>
+
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
         insert into dept (dept_name)
         values (#{deptName})

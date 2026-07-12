@@ -9,6 +9,8 @@ import jakarta.validation.constraints.NotNull;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Validated
 @RestController
 @RequestMapping("/depts")
@@ -31,5 +33,10 @@ public class DeptController {
     @PostMapping("/create")
     public R<Long> create(@RequestBody @Validated DeptCreateDTO createDTO) {
         return R.ok(deptService.create(createDTO));
+    }
+
+    @GetMapping("/list")
+    public R<List<DeptVO>> list() {
+        return R.ok(deptService.list());
     }
 }

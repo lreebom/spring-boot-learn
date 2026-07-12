@@ -105,6 +105,17 @@
         </if>
     </select>
 
+    <select id="selectByDeptIds" resultType="com.lreebom.springbootlearn.model.vo.UserVO">
+        select id, username, email, dept_id, status, create_time
+        from user
+        where deleted = 0
+        and dept_id in
+        <foreach collection="deptIds" item="deptId" open="(" separator="," close=")">
+            #{deptId}
+        </foreach>
+        order by dept_id, create_time desc
+    </select>
+
     <update id="update" parameterType="com.lreebom.springbootlearn.model.entity.User">
         update user
         <set>
