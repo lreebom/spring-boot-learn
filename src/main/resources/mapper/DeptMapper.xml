@@ -5,7 +5,19 @@
         select id, dept_name, create_time, update_time
         from dept
         where id = #{id}
-          and deleted = 0
+        and deleted = 0
     </select>
+
+    <select id="selectByDeptName" resultType="com.lreebom.springbootlearn.model.entity.Dept">
+        select id, dept_name, create_time, update_time
+        from dept
+        where dept_name = #{deptName}
+        and deleted = 0
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        insert into dept (dept_name)
+        values (#{deptName})
+    </insert>
 
 </mapper>

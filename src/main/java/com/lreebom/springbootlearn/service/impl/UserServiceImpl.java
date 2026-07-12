@@ -2,11 +2,13 @@ package com.lreebom.springbootlearn.service.impl;
 
 import com.lreebom.springbootlearn.common.BusinessException;
 import com.lreebom.springbootlearn.common.PageResult;
+import com.lreebom.springbootlearn.mapper.DeptMapper;
 import com.lreebom.springbootlearn.mapper.UserMapper;
 import com.lreebom.springbootlearn.model.dto.UserCreateDTO;
 import com.lreebom.springbootlearn.model.dto.UserDeleteDTO;
 import com.lreebom.springbootlearn.model.dto.UserPageQueryDTO;
 import com.lreebom.springbootlearn.model.dto.UserUpdateDTO;
+import com.lreebom.springbootlearn.model.entity.Dept;
 import com.lreebom.springbootlearn.model.entity.User;
 import com.lreebom.springbootlearn.model.enums.UserStatusEnum;
 import com.lreebom.springbootlearn.model.vo.UserVO;
@@ -23,8 +25,11 @@ public class UserServiceImpl implements UserService {
 
     private final UserMapper userMapper;
 
-    public UserServiceImpl(UserMapper userMapper) {
+    private final DeptMapper deptMapper;
+
+    public UserServiceImpl(UserMapper userMapper, DeptMapper deptMapper) {
         this.userMapper = userMapper;
+        this.deptMapper = deptMapper;
     }
 
     private UserVO convertToVO(User user) {
@@ -36,11 +41,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserVO getById(Long id) {
-        User user = userMapper.selectById(id);
+        UserVO user = userMapper.selectDetailById(id);
         if (user == null) {
             throw new BusinessException("用户不存在");
         }
-        return convertToVO(user);
+        user.setStatusName(UserStatusEnum.getNameByCode(user.getStatus()));
+        return user;
     }
 
     @Override
@@ -54,6 +60,11 @@ public class UserServiceImpl implements UserService {
         User existEmail = userMapper.selectByEmail(createDTO.getEmail());
         if (existEmail != null) {
             throw new BusinessException("邮箱已存在");
+        }
+
+        Dept dept = deptMapper.selectById(createDTO.getDeptId());
+        if (dept == null) {
+            throw new BusinessException("部门不存在");
         }
 
         User user = new User();
@@ -76,11 +87,11 @@ public class UserServiceImpl implements UserService {
 
         int offset = (queryDTO.getPageNum() - 1) * queryDTO.getPageSize();
 
-        List<User> records = userMapper.selectPage(queryDTO, offset, queryDTO.getPageSize());
+        List<UserVO> records = userMapper.selectPage(queryDTO, offset, queryDTO.getPageSize());
+        records.forEach(user -> user.setStatusName(UserStatusEnum.getNameByCode(user.getStatus())));
         long total = userMapper.count(queryDTO);
 
-        List<UserVO> userVOs = records.stream().map(this::convertToVO).toList();
-        return new PageResult<>(total, userVOs);
+        return new PageResult<>(total, records);
     }
 
     @Override
@@ -89,7 +100,7 @@ public class UserServiceImpl implements UserService {
             throw new BusinessException("用户ID不能为空");
         }
 
-        if (updateDTO.getUsername() == null && updateDTO.getEmail() == null && updateDTO.getStatus() == null) {
+        if (updateDTO.getUsername() == null && updateDTO.getEmail() == null && updateDTO.getStatus() == null && updateDTO.getDeptId() == null) {
             throw new BusinessException("至少更新一个字段");
         }
 
@@ -114,6 +125,13 @@ public class UserServiceImpl implements UserService {
 
         if (updateDTO.getStatus() != null && !UserStatusEnum.contains(updateDTO.getStatus())) {
             throw new BusinessException("用户状态不合法");
+        }
+
+        if (updateDTO.getDeptId() != null) {
+            Dept dept = deptMapper.selectById(updateDTO.getDeptId());
+            if (dept == null) {
+                throw new BusinessException("部门不存在");
+            }
         }
 
         User updateUser = new User();

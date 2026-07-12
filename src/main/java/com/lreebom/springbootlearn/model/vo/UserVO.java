@@ -12,4 +12,7 @@ public class UserVO {
     private Integer status;
     private String statusName;
     private LocalDateTime createTime;
+
+    private Long deptId;
+    private String deptName;
 }

@@ -29,7 +29,8 @@ public class UserControllerTest {
         String json = """
                 {
                   "username": "mock_user",
-                  "email": "bad-email"
+                  "email": "bad-email",
+                  "deptId": 1
                 }
                 """;
 

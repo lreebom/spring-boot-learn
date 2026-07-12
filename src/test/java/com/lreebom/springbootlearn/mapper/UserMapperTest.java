@@ -19,7 +19,7 @@ public class UserMapperTest {
         String suffix = String.valueOf(System.currentTimeMillis());
         user.setUsername("test_user_mapper_" + suffix);
         user.setEmail("test_user_mapper_" + suffix + "@example.com");
-
+        user.setDeptId(1L);
         int rows = userMapper.insert(user);
 
         Assertions.assertThat(rows).isEqualTo(1);

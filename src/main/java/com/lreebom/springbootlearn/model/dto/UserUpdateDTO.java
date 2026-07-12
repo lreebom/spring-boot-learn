@@ -17,4 +17,7 @@ public class UserUpdateDTO {
     private String email;
 
     private Integer status;
+
+    @Min(value = 1, message = "部门ID必须大于0")
+    private Long deptId;
 }

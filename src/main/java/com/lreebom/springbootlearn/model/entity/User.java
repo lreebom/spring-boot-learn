@@ -14,6 +14,8 @@ public class User {
     // 0: 禁用, 1: 启用
     private Integer status;
 
+    private Long deptId;
+
     // 0: 未删除, 1: 已删除
     private Integer deleted;
 

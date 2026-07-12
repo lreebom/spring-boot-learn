@@ -22,6 +22,7 @@ public class UserServiceTest {
         UserCreateDTO createDTO = new UserCreateDTO();
         createDTO.setUsername("test_user_service_" + suffix);
         createDTO.setEmail("test_user_service_" + suffix + "@example.com");
+        createDTO.setDeptId(1L);
 
         Long id = userService.create(createDTO);
 
@@ -39,11 +40,13 @@ public class UserServiceTest {
         UserCreateDTO firstDTO = new UserCreateDTO();
         firstDTO.setUsername("test_user_service_" + suffix);
         firstDTO.setEmail("test_user_service_" + suffix + "@example.com");
+        firstDTO.setDeptId(1L);
         userService.create(firstDTO);
 
         UserCreateDTO secondDTO = new UserCreateDTO();
         secondDTO.setUsername(firstDTO.getUsername());
         secondDTO.setEmail("test_user_service_" + suffix + "2@example.com");
+        secondDTO.setDeptId(1L);
 
         Assertions.assertThatThrownBy(() -> userService.create(secondDTO)).isInstanceOf(BusinessException.class).hasMessage("用户名已存在");
 
