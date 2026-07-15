@@ -79,7 +79,7 @@ public class DeptServiceImpl implements DeptService {
         deptList.forEach(dept -> {
             List<UserVO> deptUsers = userMap.getOrDefault(dept.getId(), List.of());
             dept.setUserList(deptUsers);
-            dept.setUserCount(deptUsers == null ? 0L : deptUsers.size());
+            dept.setUserCount((long) deptUsers.size());
 
         });
         return deptList;
