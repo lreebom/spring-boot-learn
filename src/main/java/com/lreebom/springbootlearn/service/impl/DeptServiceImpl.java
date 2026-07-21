@@ -1,14 +1,17 @@
 package com.lreebom.springbootlearn.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.lreebom.springbootlearn.common.BusinessException;
 import com.lreebom.springbootlearn.mapper.DeptMapper;
 import com.lreebom.springbootlearn.mapper.UserMapper;
 import com.lreebom.springbootlearn.model.dto.DeptCreateDTO;
 import com.lreebom.springbootlearn.model.entity.Dept;
+import com.lreebom.springbootlearn.model.entity.User;
 import com.lreebom.springbootlearn.model.enums.UserStatusEnum;
 import com.lreebom.springbootlearn.model.vo.DeptVO;
 import com.lreebom.springbootlearn.model.vo.UserVO;
 import com.lreebom.springbootlearn.service.DeptService;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -34,6 +37,13 @@ public class DeptServiceImpl implements DeptService {
         deptVo.setCreateTime(dept.getCreateTime());
         deptVo.setUpdateTime(dept.getUpdateTime());
         return deptVo;
+    }
+
+    private static UserVO convertToUserVO(User user) {
+        UserVO userVO = new UserVO();
+        BeanUtils.copyProperties(user, userVO);
+        userVO.setStatusName(UserStatusEnum.getNameByCode(user.getStatus()));
+        return userVO;
     }
 
     @Override
@@ -70,7 +80,14 @@ public class DeptServiceImpl implements DeptService {
 
         List<Long> deptIds = deptList.stream().map(DeptVO::getId).toList();
 
-        List<UserVO> userList = userMapper.selectByDeptIds(deptIds);
+        List<User> users = userMapper.selectList(
+                new LambdaQueryWrapper<User>()
+                        .in(User::getDeptId, deptIds)
+                        .orderByAsc(User::getDeptId)
+                        .orderByDesc(User::getCreateTime)
+        );
+
+        List<UserVO> userList = users.stream().map(DeptServiceImpl::convertToUserVO).toList();
 
         userList.forEach(user -> user.setStatusName(UserStatusEnum.getNameByCode(user.getStatus())));
 

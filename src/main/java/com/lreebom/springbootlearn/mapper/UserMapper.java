@@ -1,33 +1,19 @@
 package com.lreebom.springbootlearn.mapper;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.lreebom.springbootlearn.model.dto.UserPageQueryDTO;
 import com.lreebom.springbootlearn.model.entity.User;
 import com.lreebom.springbootlearn.model.vo.UserVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-import java.util.List;
-
 @Mapper
-public interface UserMapper {
-
-    User selectById(@Param("id") Long id);
+public interface UserMapper extends BaseMapper<User> {
 
     UserVO selectDetailById(@Param("id") Long id);
 
-    int insert(User user);
+    IPage<UserVO> selectPage(Page<UserVO> page, @Param("query") UserPageQueryDTO queryDTO);
 
-    User selectByUsername(@Param("username") String username);
-
-    User selectByEmail(@Param("email") String email);
-
-    List<UserVO> selectPage(@Param("query") UserPageQueryDTO queryDTO, @Param("offset") int offset, @Param("limit") int limit);
-
-    Long count(@Param("query") UserPageQueryDTO queryDTO);
-
-    int update(User user);
-
-    int deleteById(@Param("id") Long id);
-
-    List<UserVO> selectByDeptIds(@Param("deptIds") List<Long> deptIds);
 }

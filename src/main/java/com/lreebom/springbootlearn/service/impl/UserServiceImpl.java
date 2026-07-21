@@ -1,5 +1,8 @@
 package com.lreebom.springbootlearn.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.lreebom.springbootlearn.common.BusinessException;
 import com.lreebom.springbootlearn.common.PageResult;
 import com.lreebom.springbootlearn.mapper.DeptMapper;
@@ -32,7 +35,7 @@ public class UserServiceImpl implements UserService {
         this.deptMapper = deptMapper;
     }
 
-    private UserVO convertToVO(User user) {
+    private static UserVO convertToVO(User user) {
         UserVO userVO = new UserVO();
         BeanUtils.copyProperties(user, userVO);
         userVO.setStatusName(UserStatusEnum.getNameByCode(user.getStatus()));
@@ -52,12 +55,14 @@ public class UserServiceImpl implements UserService {
     @Override
     public Long create(UserCreateDTO createDTO) {
 
-        User existUser = userMapper.selectByUsername(createDTO.getUsername());
+        User existUser = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getUsername, createDTO.getUsername()));
+
         if (existUser != null) {
             throw new BusinessException("用户名已存在");
         }
 
-        User existEmail = userMapper.selectByEmail(createDTO.getEmail());
+        User existEmail = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getEmail, createDTO.getEmail()));
+
         if (existEmail != null) {
             throw new BusinessException("邮箱已存在");
         }
@@ -85,13 +90,15 @@ public class UserServiceImpl implements UserService {
             throw new BusinessException("用户状态不合法");
         }
 
-        int offset = (queryDTO.getPageNum() - 1) * queryDTO.getPageSize();
+        Page<UserVO> page = new Page<>(queryDTO.getPageNum(), queryDTO.getPageSize());
 
-        List<UserVO> records = userMapper.selectPage(queryDTO, offset, queryDTO.getPageSize());
+        IPage<UserVO> pageResult = userMapper.selectPage(page, queryDTO);
+
+        List<UserVO> records = pageResult.getRecords();
+
         records.forEach(user -> user.setStatusName(UserStatusEnum.getNameByCode(user.getStatus())));
-        long total = userMapper.count(queryDTO);
 
-        return new PageResult<>(total, records);
+        return new PageResult<>(pageResult.getTotal(), pageResult.getCurrent(), pageResult.getPages(), records);
     }
 
     @Override
@@ -110,15 +117,19 @@ public class UserServiceImpl implements UserService {
         }
 
         if (updateDTO.getUsername() != null) {
-            User existUsername = userMapper.selectByUsername(updateDTO.getUsername());
-            if (existUsername != null && !existUsername.getId().equals(updateDTO.getId())) {
+            User existUsername = userMapper.selectOne(new LambdaQueryWrapper<User>()
+                    .eq(User::getUsername, updateDTO.getUsername())
+                    .ne(User::getId, updateDTO.getId()));
+            if (existUsername != null) {
                 throw new BusinessException("用户名已存在");
             }
         }
 
         if (updateDTO.getEmail() != null) {
-            User existEmail = userMapper.selectByEmail(updateDTO.getEmail());
-            if (existEmail != null && !existEmail.getId().equals(updateDTO.getId())) {
+            User existEmail = userMapper.selectOne(new LambdaQueryWrapper<User>()
+                    .eq(User::getEmail, updateDTO.getEmail())
+                    .ne(User::getId, updateDTO.getId()));
+            if (existEmail != null) {
                 throw new BusinessException("邮箱已存在");
             }
         }
@@ -137,7 +148,7 @@ public class UserServiceImpl implements UserService {
         User updateUser = new User();
         BeanUtils.copyProperties(updateDTO, updateUser);
 
-        int rows = userMapper.update(updateUser);
+        int rows = userMapper.updateById(updateUser);
         if (rows != 1) {
             throw new BusinessException("更新用户失败");
         }

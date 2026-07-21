@@ -1,47 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.lreebom.springbootlearn.mapper.UserMapper">
-    <select id="selectById" resultType="com.lreebom.springbootlearn.model.entity.User">
-        select id,
-               username,
-               email,
-               status,
-               dept_id,
-               deleted,
-               create_time,
-               update_time
-        from user
-        where id = #{id}
-          and deleted = 0
-    </select>
-
-    <select id="selectByUsername" resultType="com.lreebom.springbootlearn.model.entity.User">
-        select id,
-               username,
-               email,
-               status,
-               dept_id,
-               deleted,
-               create_time,
-               update_time
-        from user
-        where username = #{username}
-          and deleted = 0
-    </select>
-
-    <select id="selectByEmail" resultType="com.lreebom.springbootlearn.model.entity.User">
-        select id,
-               username,
-               email,
-               status,
-               dept_id,
-               deleted,
-               create_time,
-               update_time
-        from user
-        where email = #{email}
-          and deleted = 0
-    </select>
 
     <select id="selectDetailById" resultType="com.lreebom.springbootlearn.model.vo.UserVO">
         select u.id, u.username, u.email, u.dept_id, d.dept_name, u.status, u.create_time
@@ -52,11 +11,6 @@
         where u.id = #{id}
           and u.deleted = 0
     </select>
-
-    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
-        insert into user (username, email, dept_id)
-        values (#{username}, #{email}, #{deptId})
-    </insert>
 
     <select id="selectPage" resultType="com.lreebom.springbootlearn.model.vo.UserVO">
         select u.id,
@@ -84,62 +38,7 @@
             and u.dept_id = #{query.deptId}
         </if>
         order by u.create_time desc
-        limit #{offset}, #{limit}
+
     </select>
 
-    <select id="count" resultType="java.lang.Long">
-        select count(*)
-        from user u
-        where u.deleted = 0
-        <if test="query.username != null and query.username != ''">
-            and u.username like concat('%', #{query.username}, '%')
-        </if>
-        <if test="query.email != null and query.email != ''">
-            and u.email like concat('%', #{query.email}, '%')
-        </if>
-        <if test="query.status != null">
-            and u.status = #{query.status}
-        </if>
-        <if test="query.deptId != null">
-            and u.dept_id = #{query.deptId}
-        </if>
-    </select>
-
-    <select id="selectByDeptIds" resultType="com.lreebom.springbootlearn.model.vo.UserVO">
-        select id, username, email, dept_id, status, create_time
-        from user
-        where deleted = 0
-        and dept_id in
-        <foreach collection="deptIds" item="deptId" open="(" separator="," close=")">
-            #{deptId}
-        </foreach>
-        order by dept_id, create_time desc
-    </select>
-
-    <update id="update" parameterType="com.lreebom.springbootlearn.model.entity.User">
-        update user
-        <set>
-            <if test="username != null">
-                username = #{username},
-            </if>
-            <if test="email != null">
-                email = #{email},
-            </if>
-            <if test="status != null">
-                status = #{status},
-            </if>
-            <if test="deptId != null">
-                dept_id = #{deptId},
-            </if>
-        </set>
-        where id = #{id}
-        and deleted = 0
-    </update>
-
-    <delete id="deleteById">
-        update user
-        set deleted = 1
-        where id = #{id}
-          and deleted = 0
-    </delete>
 </mapper>
