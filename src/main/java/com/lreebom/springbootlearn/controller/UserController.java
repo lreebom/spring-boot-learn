@@ -2,16 +2,16 @@ package com.lreebom.springbootlearn.controller;
 
 import com.lreebom.springbootlearn.common.PageResult;
 import com.lreebom.springbootlearn.common.R;
-import com.lreebom.springbootlearn.model.dto.UserCreateDTO;
-import com.lreebom.springbootlearn.model.dto.UserDeleteDTO;
-import com.lreebom.springbootlearn.model.dto.UserPageQueryDTO;
-import com.lreebom.springbootlearn.model.dto.UserUpdateDTO;
+import com.lreebom.springbootlearn.model.dto.*;
+import com.lreebom.springbootlearn.model.vo.RoleVO;
 import com.lreebom.springbootlearn.model.vo.UserVO;
 import com.lreebom.springbootlearn.service.UserService;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Validated
 @RestController
@@ -49,5 +49,16 @@ public class UserController {
     public R<Void> delete(@RequestBody @Validated UserDeleteDTO deleteDTO) {
         userService.delete(deleteDTO);
         return R.ok();
+    }
+
+    @PostMapping("/assignRoles")
+    public R<Void> assignRoles(@RequestBody @Validated UserRoleAssignDTO assignDTO) {
+        userService.assignRoles(assignDTO);
+        return R.ok();
+    }
+
+    @GetMapping("/getRolesByUserId")
+    public R<List<RoleVO>> getRolesByUserId(@RequestParam @NotNull(message = "用户ID不能为空") @Min(value = 1, message = "用户ID必须大于0") Long userId) {
+        return R.ok(userService.getRolesByUserId(userId));
     }
 }

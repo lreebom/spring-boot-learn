@@ -6,34 +6,39 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.lreebom.springbootlearn.common.BusinessException;
 import com.lreebom.springbootlearn.common.PageResult;
 import com.lreebom.springbootlearn.mapper.DeptMapper;
+import com.lreebom.springbootlearn.mapper.RoleMapper;
 import com.lreebom.springbootlearn.mapper.UserMapper;
-import com.lreebom.springbootlearn.model.dto.UserCreateDTO;
-import com.lreebom.springbootlearn.model.dto.UserDeleteDTO;
-import com.lreebom.springbootlearn.model.dto.UserPageQueryDTO;
-import com.lreebom.springbootlearn.model.dto.UserUpdateDTO;
+import com.lreebom.springbootlearn.mapper.UserRoleMapper;
+import com.lreebom.springbootlearn.model.dto.*;
 import com.lreebom.springbootlearn.model.entity.Dept;
+import com.lreebom.springbootlearn.model.entity.Role;
 import com.lreebom.springbootlearn.model.entity.User;
+import com.lreebom.springbootlearn.model.entity.UserRole;
+import com.lreebom.springbootlearn.model.enums.RoleStatusEnum;
 import com.lreebom.springbootlearn.model.enums.UserStatusEnum;
+import com.lreebom.springbootlearn.model.vo.RoleVO;
 import com.lreebom.springbootlearn.model.vo.UserVO;
 import com.lreebom.springbootlearn.service.UserService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
     private final UserMapper userMapper;
 
     private final DeptMapper deptMapper;
 
-    public UserServiceImpl(UserMapper userMapper, DeptMapper deptMapper) {
-        this.userMapper = userMapper;
-        this.deptMapper = deptMapper;
-    }
+    private final RoleMapper roleMapper;
+
+    private final UserRoleMapper userRoleMapper;
 
     private static UserVO convertToVO(User user) {
         UserVO userVO = new UserVO();
@@ -167,5 +172,74 @@ public class UserServiceImpl implements UserService {
             throw new BusinessException("删除用户失败");
         }
         log.info("删除用户成功，userId={} username={}", user.getId(), user.getUsername());
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void assignRoles(UserRoleAssignDTO assignDTO) {
+        User user = userMapper.selectById(assignDTO.getUserId());
+        if (user == null) {
+            throw new BusinessException("用户不存在");
+        }
+
+        List<Long> roleIds = assignDTO.getRoleIds().stream().distinct().toList();
+
+        if (!roleIds.isEmpty()) {
+            Long roleCount = roleMapper.selectCount(
+                    new LambdaQueryWrapper<Role>()
+                            .in(Role::getId, roleIds)
+                            .eq(Role::getStatus, RoleStatusEnum.ENABLED.getCode())
+            );
+
+            if (roleCount != roleIds.size()) {
+                throw new BusinessException("部分角色不存在或已禁用");
+            }
+        }
+
+        userRoleMapper.delete(
+                new LambdaQueryWrapper<UserRole>()
+                        .eq(UserRole::getUserId, assignDTO.getUserId())
+        );
+
+        for (Long roleId : roleIds) {
+            UserRole userRole = new UserRole();
+            userRole.setUserId(assignDTO.getUserId());
+            userRole.setRoleId(roleId);
+            int rows = userRoleMapper.insert(userRole);
+            if (rows != 1) {
+                throw new BusinessException("分配角色失败");
+            }
+        }
+
+        log.info("用户角色分配成功，userId={} roleIds={}", assignDTO.getUserId(), roleIds);
+    }
+
+    @Override
+    public List<RoleVO> getRolesByUserId(Long userId) {
+        User user = userMapper.selectById(userId);
+        if (user == null) {
+            throw new BusinessException("用户不存在");
+        }
+
+        List<Long> roleIds = userRoleMapper.selectList(
+                new LambdaQueryWrapper<UserRole>()
+                        .eq(UserRole::getUserId, userId)
+        ).stream().map(UserRole::getRoleId).toList();
+
+        if (roleIds.isEmpty()) {
+            return List.of();
+        }
+
+        List<Role> roles = roleMapper.selectList(
+                new LambdaQueryWrapper<Role>()
+                        .in(Role::getId, roleIds)
+                        .eq(Role::getStatus, RoleStatusEnum.ENABLED.getCode())
+        );
+
+        return roles.stream().map(role -> {
+            RoleVO roleVO = new RoleVO();
+            BeanUtils.copyProperties(role, roleVO);
+            return roleVO;
+        }).toList();
     }
 }
