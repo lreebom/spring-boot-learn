@@ -22,10 +22,14 @@ import com.lreebom.springbootlearn.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -161,6 +165,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @CacheEvict(cacheNames = "userRoles", key = "#deleteDTO.id")
     public void delete(UserDeleteDTO deleteDTO) {
         User user = userMapper.selectById(deleteDTO.getId());
         if (user == null) {
@@ -176,6 +181,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(cacheNames = "userRoles", key = "#assignDTO.userId")
     public void assignRoles(UserRoleAssignDTO assignDTO) {
         User user = userMapper.selectById(assignDTO.getUserId());
         if (user == null) {
@@ -215,6 +221,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Cacheable(cacheNames = "userRoles", key = "#userId")
     public List<RoleVO> getRolesByUserId(Long userId) {
         User user = userMapper.selectById(userId);
         if (user == null) {
@@ -227,7 +234,7 @@ public class UserServiceImpl implements UserService {
         ).stream().map(UserRole::getRoleId).toList();
 
         if (roleIds.isEmpty()) {
-            return List.of();
+            return new ArrayList<>();
         }
 
         List<Role> roles = roleMapper.selectList(
@@ -236,10 +243,12 @@ public class UserServiceImpl implements UserService {
                         .eq(Role::getStatus, RoleStatusEnum.ENABLED.getCode())
         );
 
-        return roles.stream().map(role -> {
+        List<RoleVO> roleVOs = roles.stream().map(role -> {
             RoleVO roleVO = new RoleVO();
             BeanUtils.copyProperties(role, roleVO);
             return roleVO;
-        }).toList();
+        }).collect(Collectors.toList());
+
+        return roleVOs;
     }
 }
